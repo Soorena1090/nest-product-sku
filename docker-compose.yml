@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  
+  mongo:
+    image: mongo:latest
+    container_name: mongo-test-rs
+    ports:
+      - "27017:27017"
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"] 
+    volumes:
+      - mongo_data:/data/db
+      - ./init-mongo-rs.sh:/docker-entrypoint-initdb.d/init-mongo-rs.sh 
+
+  
+  app_test:
+    build:
+      context: .
+      dockerfile: Dockerfile.test 
+    container_name: nest-test-app
+   
+    depends_on:
+      - mongo
+    environment:
+     
+      
+      DATABASE_URL: "mongodb://mongo:27017/test_db?replicaSet=rs0" 
+    
+
+volumes:
+  mongo_data:

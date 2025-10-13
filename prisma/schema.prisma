@@ -1,0 +1,39 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model PhysicalProduct {
+  id           String    @id @map("_id") @default(auto()) @db.ObjectId
+  title        String
+  description  String
+  images       String[]
+  packaging    Packaging
+  shippingType String?
+  status       String
+  purchasable  Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+type Packaging {
+  width  Float?
+  height Float?
+  length Float?
+  weight Float?
+}
+
+model SKU {
+  id         String   @id @map("_id") @default(auto()) @db.ObjectId
+  productId  String   @db.ObjectId
+  price      Float
+  quantity   Int
+  externalId String   @unique
+  image      String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
