@@ -1,98 +1,258 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Nest Products Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A simple products and SKUs REST API built with NestJS 11, Prisma Client for MongoDB, and Jest for testing. It exposes CRUD endpoints for `products` and `skus`, and uses MongoDB (replica set enabled) as the database.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### Overview
+- **Framework**: NestJS 11 (`@nestjs/common`, `@nestjs/core`, `@nestjs/platform-express`)
+- **ORM/Client**: Prisma 6 (`@prisma/client`, `prisma`) with MongoDB provider
+- **Database**: MongoDB (replica set `rs0` in Docker compose)
+- **Validation**: `class-validator`, `class-transformer`
+- **Tooling**: TypeScript, ESLint, Prettier
+- **Testing**: Jest 30, Supertest, `mongodb-memory-server` for isolated tests
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech Stack
+- **Runtime**: Node.js 18+
+- **Language**: TypeScript 5
+- **Framework**: NestJS 11
+- **Database**: MongoDB
+- **ORM/Client**: Prisma Client (MongoDB provider)
+- **Validation**: class-validator, class-transformer
+- **Testing**: Jest, Supertest, ts-jest, mongodb-memory-server
+- **Linting/Formatting**: ESLint, Prettier
+- **Containerization**: Docker, Docker Compose
 
-## Project setup
+---
 
-```bash
-$ npm install
+## Project Structure
+```
+backend/
+  src/
+    product/           # Products module (controller/service/dto)
+    sku/               # SKUs module (controller/service/dto)
+    prisma/            # PrismaService integration for Nest
+    main.ts            # App bootstrap (listens on port 3000)
+  prisma/
+    schema.prisma      # Prisma schema (MongoDB provider)
+  docker-compose.yml   # MongoDB (replica set) + test app container
+  Dockerfile.test      # Multi-stage Dockerfile used by compose test service
+  package.json         # Scripts and dependencies
 ```
 
-## Compile and run the project
+---
+
+## Installation
+1. Ensure you have Node.js 18+ and npm installed.
+2. Install dependencies:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm install
 ```
 
-## Run tests
+3. Create a `.env` file (see Environment Variables) or rely on Docker Compose which sets `DATABASE_URL` for the test app service.
+
+---
+
+## Environment Variables
+Create a `.env` file at the project root (`backend/.env`) when running locally without Docker:
+
+```env
+# Mongo connection string; Prisma uses this for the MongoDB datasource
+DATABASE_URL=mongodb://localhost:27017/nest_products?replicaSet=rs0
+```
+
+Notes:
+- Prisma schema uses the `DATABASE_URL` env var. For MongoDB with Prisma, a replica set is recommended. The provided Docker Compose config starts MongoDB with replica set `rs0`.
+- The app listens on port `3000` by default (set in `src/main.ts`).
+
+---
+
+## Prisma
+This project uses Prisma Client with the MongoDB provider.
+
+- Generate the Prisma Client (after installing dependencies):
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npx prisma generate
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+- Push the schema to the database (MongoDB uses `db push`, not SQL migrations):
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npx prisma db push
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- Optional: open Prisma Studio to inspect data:
 
-## Resources
+```bash
+npx prisma studio
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+The schema models include `PhysicalProduct` and `SKU` with typical fields for a simple catalog.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+---
 
-## Support
+## Running Locally
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+### With Docker (recommended for MongoDB replica set)
+Start MongoDB (replica set) and the test container:
 
-## Stay in touch
+```bash
+docker compose up -d
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+This will:
+- Start `mongo` with replica set `rs0` and initialize it using `init-mongo-rs.sh`.
+- Build a Node image as `app_test` container. By default, it tails and does not auto-run the app.
 
-## License
+You can still run the Nest app on your host machine pointing to the Dockerized MongoDB via:
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+export DATABASE_URL="mongodb://localhost:27017/test_db?replicaSet=rs0"
+npm run start:dev
+```
+
+Alternatively, `exec` into the `app_test` container if you want to run commands inside it:
+
+```bash
+docker compose exec app_test sh
+# inside container
+npm run start:dev
+```
+
+### Without Docker (local MongoDB)
+If you have MongoDB locally, make sure it runs as a replica set (e.g., `rs0`). Then set your `.env` and run:
+
+```bash
+npm run start:dev
+```
+
+Production build:
+
+```bash
+npm run build
+npm run start:prod
+```
+
+---
+
+## API Endpoints
+
+Base URL: `http://localhost:3000`
+
+### Products
+- `POST /products`
+- `GET /products`
+- `GET /products/:id`
+- `PUT /products/:id`
+- `DELETE /products/:id` (204 No Content)
+
+### SKUs
+- `POST /skus`
+- `GET /skus`
+- `GET /skus/:id`
+- `PUT /skus/:id`
+- `DELETE /skus/:id` (204 No Content)
+
+Example request:
+
+```bash
+curl -X POST http://localhost:3000/skus \
+  -H "Content-Type: application/json" \
+  -d '{
+    "productId": "66f5b4d2a8c4f0a0f0a0f0a0",
+    "price": 19.99,
+    "quantity": 10,
+    "externalId": "EXT-123",
+    "image": "https://example.com/image.jpg"
+  }'
+```
+
+---
+
+## Testing
+
+This project uses Jest and Supertest. Useful scripts:
+
+```bash
+# Unit tests
+npm test
+
+# Watch mode
+npm run test:watch
+
+# Coverage
+npm run test:cov
+
+# E2E tests
+npm run test:e2e
+```
+
+Jest is configured in `package.json` with `ts-jest`. E2E configuration lives in `test/jest-e2e.json`.
+
+---
+
+## Linting & Formatting
+
+```bash
+# Lint and attempt auto-fixes
+npm run lint
+
+# Format with Prettier
+npm run format
+```
+
+---
+
+## Docker Details
+
+- `docker-compose.yml` spins up:
+  - `mongo`: MongoDB with replica set `rs0` (ports `27017:27017`)
+  - `app_test`: Node 18-based image built from `Dockerfile.test`
+- `init-mongo-rs.sh` initializes the replica set on container start.
+- `Dockerfile.test` uses a multi-stage build and keeps the container running with `tail -f /dev/null` so you can exec in and run commands.
+
+Common commands:
+
+```bash
+# Start services
+docker compose up -d
+
+# View logs
+docker compose logs -f mongo
+
+# Exec into test app container
+docker compose exec app_test sh
+
+# Stop and remove services
+docker compose down -v
+```
+
+---
+
+## Scripts
+Key npm scripts from `package.json`:
+
+```bash
+npm run start         # start app
+npm run start:dev     # start in watch mode
+npm run start:debug   # start with debugger
+npm run start:prod    # run dist build
+npm run build         # compile TypeScript to dist/
+npm run lint          # ESLint
+npm run format        # Prettier
+npm test              # unit tests
+npm run test:watch    # jest --watch
+npm run test:cov      # coverage
+npm run test:e2e      # e2e tests
+```
+
+---
+
+## Notes & Tips
+- For Prisma + MongoDB, use `db push` (not SQL migrations).
+- Ensure your MongoDB instance runs as a replica set (required for some Prisma features and transactions).
+- Default app port is `3000`; adjust in `src/main.ts` if needed.
+
+
