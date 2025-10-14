@@ -227,6 +227,10 @@ export class ProductService {
         throw new BadRequestException('sku.quantity must be an integer');
       if (!s.externalId)
         throw new BadRequestException('sku.externalId is required');
+      if (!s.image || typeof s.image !== 'string')
+        throw new BadRequestException(
+          'sku.image is required and must be a non-empty string',
+        );
     }
   }
 
