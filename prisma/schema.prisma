@@ -37,3 +37,12 @@ model SKU {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
+model User {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  username   String   @unique
+  password   String
+  role       String   @default("user")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
